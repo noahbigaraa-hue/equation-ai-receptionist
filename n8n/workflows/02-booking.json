@@ -1,0 +1,291 @@
+{
+  "name": "2 - Booking",
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "bbfb8df2-3fdb-4494-aaaf-1ad84af01eec",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "b4fc40e9bb0fb683b2ef40e485172be70db3a29a2bb3e69c17508199285adf7d@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "Equation Discovery Calls"
+        },
+        "start": "={{ $json.appointment_start }}",
+        "end": "={{ $json.appointment_end }}",
+        "additionalFields": {
+          "description": "=Booked by AI receptionist.  Caller: {{ $json.caller_name }} ({{ $json.caller_phone }})  Call summary: {{ $json.call_summary }}",
+          "summary": "=Appointment: {{ $json.caller_name }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        224,
+        0
+      ],
+      "id": "70ce0e7e-92bd-4735-abf5-b77cc3e39b6f",
+      "name": "Create an event",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "7pyExXcOIsdwosTU",
+          "name": "Google Calendar account 2"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('When Executed by Another Workflow').item.json.caller_email }}",
+        "subject": "Your appointment is confirmed",
+        "emailType": "text",
+        "message": "=Hi {{ $('When Executed by Another Workflow').item.json.caller_name }}, your appointment is confirmed for {{ $('When Executed by Another Workflow').item.json.appointment_start }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        448,
+        0
+      ],
+      "id": "25af41e8-4c22-4ca2-a7ff-88c331e79786",
+      "name": "Send a message",
+      "webhookId": "ca6a6bb3-35b4-4cda-b4e0-8f2ecb17e316",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "VPztnIKW33DDWz3p",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "from": "+12392997352",
+        "to": "={{ $('When Executed by Another Workflow').item.json.caller_phone }}",
+        "message": "=Hi {{ $('When Executed by Another Workflow').item.json.caller_name }}, your appointment is confirmed for {{ $('When Executed by Another Workflow').item.json.appointment_start }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.twilio",
+      "typeVersion": 1,
+      "position": [
+        48,
+        176
+      ],
+      "id": "8f301f13-f673-4afe-bc6c-65e144623891",
+      "name": "Send an SMS/MMS/WhatsApp message",
+      "credentials": {
+        "twilioApi": {
+          "id": "oQy4kmpRVs08OIO9",
+          "name": "Twilio account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "19ekskZGExeGti_9hSGJaCeaOcB3G0E1vxYg9I_yi3no",
+          "mode": "list",
+          "cachedResultName": "    Wondora Brands AI Receptionist",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/19ekskZGExeGti_9hSGJaCeaOcB3G0E1vxYg9I_yi3no/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1652762002,
+          "mode": "list",
+          "cachedResultName": "Bookings",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/19ekskZGExeGti_9hSGJaCeaOcB3G0E1vxYg9I_yi3no/edit#gid=1652762002"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "call_id": "={{ $('When Executed by Another Workflow').item.json.call_id }}",
+            "caller_phone": "={{ $('When Executed by Another Workflow').item.json.caller_phone }}",
+            "caller_name": "={{ $('When Executed by Another Workflow').item.json.caller_name }}",
+            "caller_email": "={{ $('When Executed by Another Workflow').item.json.caller_email }}",
+            "intent": "={{ $('When Executed by Another Workflow').item.json.intent }}",
+            "appointment_start": "={{ $('When Executed by Another Workflow').item.json.appointment_start }}",
+            "appointment_end": "={{ $('When Executed by Another Workflow').item.json.appointment_end }}",
+            "message": "={{ $('When Executed by Another Workflow').item.json.message }}",
+            "call_summary": "={{ $('When Executed by Another Workflow').item.json.call_summary }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "call_id",
+              "displayName": "call_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "caller_phone",
+              "displayName": "caller_phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "caller_name",
+              "displayName": "caller_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "caller_email",
+              "displayName": "caller_email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "intent",
+              "displayName": "intent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "appointment_start",
+              "displayName": "appointment_start",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "appointment_end",
+              "displayName": "appointment_end",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "message",
+              "displayName": "message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "call_summary",
+              "displayName": "call_summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        672,
+        0
+      ],
+      "id": "0c0072f0-424a-41ff-a511-23ed1fa34fb0",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "aMeTn0TL5vj8xKwm",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Create an event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create an event": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send an SMS/MMS/WhatsApp message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "i7lxxYMvVcEHMHdt",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "versionId": "b5e0de5a-c14f-4d01-b349-ec6b352d41d7",
+  "nodeGroups": [],
+  "id": "njAV9xnSsJiREcFs",
+  "tags": []
+}

@@ -1,0 +1,101 @@
+{
+  "name": "5 - Check Calendar Availability",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "check-availability",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "95c40143-6648-46e0-a199-3c679e1e9e9c",
+      "name": "Webhook",
+      "webhookId": "d1136fac-be9d-4715-ab30-92a8621cefa6"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ (() => { const source = $('Webhook').first().json; const req = source.body?.args || source.body || source.args || source; const requestedStart = DateTime.fromISO(req.start_time).setZone('America/New_York'); const requestedEnd = requestedStart.plus({ minutes: 30 }); const durationMinutes = 30; const busy = $items('Get many events').map(i => i.json).filter(e => e && e.start && e.end).map(e => ({ start: DateTime.fromISO(e.start.dateTime || e.start.date || e.start).setZone('America/New_York'), end: DateTime.fromISO(e.end.dateTime || e.end.date || e.end).setZone('America/New_York') })); const isFree = (start, end) => !busy.some(block => start < block.end && end > block.start); const withinHours = requestedStart.weekday <= 5 && requestedStart.hour >= 9 && requestedEnd.hour + requestedEnd.minute / 60 <= 17; if (withinHours && isFree(requestedStart, requestedEnd)) return { success: true, available: true, start_time: requestedStart.toISO(), end_time: requestedEnd.toISO() }; const candidates = []; for (let offset = -3; offset <= 3; offset++) { const day = requestedStart.plus({ days: offset }).startOf('day'); if (day.weekday > 5) continue; const open = day.set({ hour: 9 }); const close = day.set({ hour: 17 }); for (let start = open; start.plus({ minutes: durationMinutes }) <= close; start = start.plus({ minutes: 30 })) { const end = start.plus({ minutes: durationMinutes }); if (isFree(start, end)) candidates.push({ start, end }); } } candidates.sort((a, b) => Math.abs(a.start.toMillis() - requestedStart.toMillis()) - Math.abs(b.start.toMillis() - requestedStart.toMillis()) || a.start.toMillis() - b.start.toMillis()); return { success: true, available: false, requested_start: requestedStart.toISO(), alternatives: candidates.slice(0, 3).map(slot => ({ start_time: slot.start.toISO(), end_time: slot.end.toISO() })) }; })() }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        448,
+        0
+      ],
+      "id": "4fc5a2e6-98be-440d-8cec-6bdbb7398dac",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "b4fc40e9bb0fb683b2ef40e485172be70db3a29a2bb3e69c17508199285adf7d@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "Equation Discovery Calls"
+        },
+        "returnAll": true,
+        "timeMin": "={{ DateTime.fromISO($json.body?.start_time || $json.body?.args?.start_time || $json.start_time || $json.args?.start_time).setZone('America/New_York').minus({ days: 3 }).startOf('day').set({ hour: 9 }) }}",
+        "timeMax": "={{ DateTime.fromISO($json.body?.start_time || $json.body?.args?.start_time || $json.start_time || $json.args?.start_time).setZone('America/New_York').plus({ days: 3 }).startOf('day').set({ hour: 17 }) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        224,
+        0
+      ],
+      "id": "6bfdbafc-450c-4a13-9671-83e69be98e0b",
+      "name": "Get many events",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "7pyExXcOIsdwosTU",
+          "name": "Google Calendar account 2"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Get many events",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many events": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "baee4720-1e9d-460b-b50e-afc8199f93c0",
+  "nodeGroups": [],
+  "id": "dKrtxs0EmMmVcVdy",
+  "tags": []
+}

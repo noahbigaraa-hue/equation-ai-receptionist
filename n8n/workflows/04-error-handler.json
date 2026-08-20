@@ -1,0 +1,63 @@
+{
+  "name": "4 - Error Handler",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "4ff936f7-0da6-48dc-a560-d8b8babf8333",
+      "name": "Error Trigger"
+    },
+    {
+      "parameters": {
+        "sendTo": "brendon@wondorabrands.com",
+        "subject": "=n8n FAILED: {{ $json.workflow.name }}",
+        "emailType": "text",
+        "message": "A workflow just failed.  Workflow: {{ $json.workflow.name }} Failed node: {{ $json.execution.lastNodeExecuted }} Error: {{ $json.execution.error.message }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        224,
+        0
+      ],
+      "id": "db39b80b-f7af-4591-8be5-e2f7d377d32c",
+      "name": "Send a message",
+      "webhookId": "40c35df3-4dcf-4bea-a8d5-eeabbd4481fb",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "VPztnIKW33DDWz3p",
+          "name": "Gmail account 2"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Error Trigger": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "be341f41-9ede-4e34-b30f-535c0033ca3c",
+  "nodeGroups": [],
+  "id": "i7lxxYMvVcEHMHdt",
+  "tags": []
+}

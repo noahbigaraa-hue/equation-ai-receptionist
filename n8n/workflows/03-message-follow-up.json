@@ -1,0 +1,245 @@
+{
+  "name": "3 - Message & Follow-Up",
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "401db135-0fc1-4856-a906-60365182ce8d",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "sendTo": "brendon@wondorabrands.com",
+        "subject": "=New message from {{ $('When Executed by Another Workflow').item.json.caller_name }} ({{ $('When Executed by Another Workflow').item.json.caller_phone }})",
+        "emailType": "text",
+        "message": "=Your AI receptionist took a message:  Caller: {{ $('When Executed by Another Workflow').item.json.caller_name }} Phone: {{ $('When Executed by Another Workflow').item.json.caller_phone }} Email: {{ $('When Executed by Another Workflow').item.json.caller_email }} Message: {{ $('When Executed by Another Workflow').item.json.message }} Call summary: {{ $('When Executed by Another Workflow').item.json.call_summary }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        448,
+        0
+      ],
+      "id": "b682fa9c-1b55-4730-ae9d-fbcca20496c8",
+      "name": "Send a message",
+      "webhookId": "9ed38ab4-e38b-446b-942f-41c107ae1608",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "VPztnIKW33DDWz3p",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "from": "+12392997352",
+        "to": "={{ $('When Executed by Another Workflow').item.json.caller_phone }}",
+        "message": "=Hi {{ $('When Executed by Another Workflow').item.json.caller_name }}, thanks for calling! We received your message and someone will get back to you shortly",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.twilio",
+      "typeVersion": 1,
+      "position": [
+        208,
+        160
+      ],
+      "id": "af9e68bb-8cf4-425d-816a-0af5469b9437",
+      "name": "Send an SMS/MMS/WhatsApp message",
+      "credentials": {
+        "twilioApi": {
+          "id": "oQy4kmpRVs08OIO9",
+          "name": "Twilio account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "19ekskZGExeGti_9hSGJaCeaOcB3G0E1vxYg9I_yi3no",
+          "mode": "list",
+          "cachedResultName": "    Wondora Brands AI Receptionist",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/19ekskZGExeGti_9hSGJaCeaOcB3G0E1vxYg9I_yi3no/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 929138172,
+          "mode": "list",
+          "cachedResultName": "Messages",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/19ekskZGExeGti_9hSGJaCeaOcB3G0E1vxYg9I_yi3no/edit#gid=929138172"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "call_id": "={{ $('When Executed by Another Workflow').item.json.call_id }}",
+            "caller_phone": "={{ $('When Executed by Another Workflow').item.json.caller_phone }}",
+            "caller_name": "={{ $('When Executed by Another Workflow').item.json.caller_name }}",
+            "caller_email": "={{ $('When Executed by Another Workflow').item.json.caller_email }}",
+            "intent": "={{ $('When Executed by Another Workflow').item.json.intent }}",
+            "appointment_start": "={{ $('When Executed by Another Workflow').item.json.appointment_start }}",
+            "appointment_end": "={{ $('When Executed by Another Workflow').item.json.appointment_end }}",
+            "message": "={{ $('When Executed by Another Workflow').item.json.message }}",
+            "call_summary": "={{ $('When Executed by Another Workflow').item.json.call_summary }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "call_id",
+              "displayName": "call_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "caller_phone",
+              "displayName": "caller_phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "caller_name",
+              "displayName": "caller_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "caller_email",
+              "displayName": "caller_email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "intent",
+              "displayName": "intent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "appointment_start",
+              "displayName": "appointment_start",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "appointment_end",
+              "displayName": "appointment_end",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "message",
+              "displayName": "message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "call_summary",
+              "displayName": "call_summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        320,
+        0
+      ],
+      "id": "4b573027-1000-4931-867c-5111f6ca75c1",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "aMeTn0TL5vj8xKwm",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Send an SMS/MMS/WhatsApp message",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send an SMS/MMS/WhatsApp message": {
+      "main": [
+        []
+      ]
+    },
+    "Send a message": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "i7lxxYMvVcEHMHdt",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "versionId": "afb2d19b-5734-4cd8-bc5b-892bf3708009",
+  "nodeGroups": [],
+  "id": "hw3rdf9VcULfUr60",
+  "tags": []
+}

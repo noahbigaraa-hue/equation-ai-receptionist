@@ -1,0 +1,103 @@
+{
+  "name": "6 - Create Calendar Booking",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "book-appointment",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "97fd1e50-cc5f-4493-8fbf-04c1cfeb9008",
+      "name": "Webhook",
+      "webhookId": "ea58f0d9-31c0-4e7d-b25c-27d09f0db74b"
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "b4fc40e9bb0fb683b2ef40e485172be70db3a29a2bb3e69c17508199285adf7d@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "Equation Discovery Calls"
+        },
+        "start": "={{ $json.body?.args?.start_time || $json.body?.start_time || $json.args?.start_time || $json.start_time }}",
+        "end": "={{ DateTime.fromISO($json.body?.args?.start_time || $json.body?.start_time || $json.args?.start_time || $json.start_time).setZone('America/New_York').plus({ minutes: 30 }).toISO() }}",
+        "additionalFields": {
+          "description": "=Booked by Wondora AI Receptionist\n\nCaller: {{ $json.body?.args?.caller_name || $json.body?.caller_name || $json.args?.caller_name || $json.caller_name }}\nPhone: {{ $json.body?.args?.caller_phone || $json.body?.caller_phone || $json.args?.caller_phone || $json.caller_phone }}\nEmail: {{ $json.body?.args?.caller_email || $json.body?.caller_email || $json.args?.caller_email || $json.caller_email || 'Not provided' }}\nConfirmed appointment: {{ DateTime.fromISO($json.body?.args?.start_time || $json.body?.start_time || $json.args?.start_time || $json.start_time).setZone('America/New_York').toFormat(\"cccc, LLLL d, yyyy 'at' h:mm a\") }} Eastern\nBusiness timezone: Eastern Time (America/New_York)\nRetell Call ID: {{ $json.body?.call?.call_id || $json.body?.call_id || $json.call_id || 'Unavailable' }}",
+          "id": "={{ ('wondora' + ($json.body?.call?.call_id || $json.body?.call_id || $json.call_id || $json.body?.args?.caller_phone || $json.body?.caller_phone || $json.args?.caller_phone || $json.caller_phone || 'unknown') + ($json.body?.args?.start_time || $json.body?.start_time || $json.args?.start_time || $json.start_time)).toLowerCase().replace(/[^a-v0-9]/g, '').slice(0, 100) }}",
+          "summary": "=Marketing Consultation — {{ $json.body?.args?.caller_name || $json.body?.caller_name || $json.args?.caller_name || $json.caller_name }} — {{ DateTime.fromISO($json.body?.args?.start_time || $json.body?.start_time || $json.args?.start_time || $json.start_time).setZone('America/New_York').toFormat('h:mm a') }} ET"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        224,
+        0
+      ],
+      "id": "7ee84a82-da28-487b-8519-6498614506e0",
+      "name": "Create an event",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "7pyExXcOIsdwosTU",
+          "name": "Google Calendar account 2"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"success\": true,\n  \"message\": \"Appointment booked successfully\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        448,
+        0
+      ],
+      "id": "78cf2346-d844-4d15-b50c-e6d379b6ac5e",
+      "name": "Respond to Webhook"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Create an event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create an event": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "a567cd5c-6534-4f59-9383-4d1543d69820",
+  "nodeGroups": [],
+  "id": "opQJxjO8mL9ehYY3",
+  "tags": []
+}

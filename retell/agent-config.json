@@ -1,0 +1,67 @@
+{
+  "snapshot_date": "2026-08-19",
+  "agent": {
+    "name": "Wondora V2",
+    "published_version": 14,
+    "version_title": "Direct post-booking close",
+    "phone_assignment": "Latest Published",
+    "phone_number": "+12392997352",
+    "llm": "GPT 4.1"
+  },
+  "welcome_message": {
+    "mode": "AI speaks first",
+    "type": "Custom message",
+    "pause_before_speaking_seconds": 0,
+    "text": "Howzit, thanks for calling Wondora. I'm Isabella, how can I help you today?"
+  },
+  "voice": {
+    "name": "Cimo",
+    "voice_id": "fish_audio-Cimo",
+    "model": "Auto (S2.1 Pro)",
+    "expressive_mode": false,
+    "speed": 1.12,
+    "temperature": 1.0,
+    "volume": 1.0,
+    "language": "English (US)"
+  },
+  "speech_settings": {
+    "background_sound": "Coffee Shop",
+    "response_eagerness": 1.0,
+    "dynamic_response_eagerness": false,
+    "interruption_sensitivity": 0.9,
+    "reminder_frequency_seconds": 10,
+    "reminder_max_times": 1
+  },
+  "business": {
+    "timezone": "America/New_York",
+    "hours": "Monday-Friday, 9:00 AM-5:00 PM Eastern",
+    "appointment_type": "Marketing Consulting",
+    "appointment_duration_minutes": 30,
+    "calendar_name": "Equation Discovery Calls"
+  },
+  "attached_functions": [
+    "end_call",
+    "check_availability_cal",
+    "book_appointment_cal"
+  ],
+  "webhook": {
+    "url": "https://equation-us.app.n8n.cloud/webhook/retell-call-intake",
+    "timeout_seconds": 5,
+    "enabled_events": [
+      "call_started",
+      "call_ended",
+      "call_analyzed"
+    ],
+    "disabled_events": [
+      "transcript_updated",
+      "transfer_started",
+      "transfer_bridged",
+      "transfer_cancelled",
+      "transfer_ended"
+    ]
+  },
+  "notes": [
+    "The editor showed an unchanged V15 draft from V14 with Publish disabled; V14 remains the latest published production version.",
+    "The V14-derived function list showed three attached functions. The prompt references transfer_call, so transfer attachment and destination must be verified manually during a restore."
+  ]
+}

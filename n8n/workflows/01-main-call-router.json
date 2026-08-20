@@ -1,0 +1,987 @@
+{
+  "name": "1 - Main Call Router (Retell Intake)",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 4. ERROR HANDLER\nFires automatically whenever ANY workflow that points to it fails.\nNo more silent failures — you get an email with the workflow name, the node that broke, and the error.\n\nSETUP: open workflows 1–3, go to Settings (3 dots, top right) → 'Error Workflow' → select this workflow.",
+        "height": 240,
+        "width": 440
+      },
+      "id": "f83870cc-222f-4740-b1f9-6ffb59d022bb",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        4720,
+        -2544
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "7a5c4e86-3b88-4737-aaa9-cf7e4483bd48",
+      "name": "On Any Workflow Error",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        4784,
+        -2208
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "brendon@wondorabrands.com",
+        "subject": "=⚠️ n8n FAILED: {{ $json.workflow.name }}",
+        "emailType": "text",
+        "message": "=A workflow just failed.\n\nWorkflow: {{ $json.workflow.name }}\nFailed node: {{ $json.execution.lastNodeExecuted }}\nError: {{ $json.execution.error.message }}\n\nOpen the failed run here:\n{{ $json.execution.url }}",
+        "options": {}
+      },
+      "id": "02494ad3-4206-4570-a3a6-48bf9b938fac",
+      "name": "Email Jack the Error",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2,
+      "position": [
+        5024,
+        -2208
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000,
+      "webhookId": "a7914b62-e1b0-4715-87e2-26bbe64187d6",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "VPztnIKW33DDWz3p",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "73029239-6681-477b-b6c4-0ba0c999a53f",
+      "name": "When Called by Main Router",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1,
+      "position": [
+        4736,
+        -1632
+      ]
+    },
+    {
+      "parameters": {
+        "calendar": "primary",
+        "start": "={{ $json.appointment_start }}",
+        "end": "={{ $json.appointment_end }}",
+        "additionalFields": {
+          "description": "=Booked by AI receptionist.\nCaller: {{ $json.caller_name }} ({{ $json.caller_phone }})\nCall summary: {{ $json.call_summary }}",
+          "summary": "=Appointment: {{ $json.caller_name }}"
+        }
+      },
+      "id": "e6197db4-70d5-466c-999e-5492227553e4",
+      "name": "Create Calendar Event",
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1,
+      "position": [
+        4976,
+        -1632
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000,
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "7pyExXcOIsdwosTU",
+          "name": "Google Calendar account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('When Called by Main Router').item.json.caller_email }}",
+        "subject": "Your appointment is confirmed",
+        "emailType": "text",
+        "message": "=Hi {{ $('When Called by Main Router').item.json.caller_name }},\n\nYour appointment is confirmed for {{ $('When Called by Main Router').item.json.appointment_start }}.\n\nIf you need to reschedule, just call us back.\n\nThank you!",
+        "options": {}
+      },
+      "id": "3a162d96-5767-4fac-ab39-b6281d42e3ef",
+      "name": "Email Confirmation",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2,
+      "position": [
+        5216,
+        -1728
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000,
+      "webhookId": "1d502598-ca8d-4b3f-b2c5-bbb509007684",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "VPztnIKW33DDWz3p",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "from": "+12392997352",
+        "to": "={{ $('When Called by Main Router').item.json.caller_phone }}",
+        "message": "=Hi {{ $('When Called by Main Router').item.json.caller_name }}, your appointment is confirmed for {{ $('When Called by Main Router').item.json.appointment_start }}. Reply or call us to reschedule.",
+        "options": {}
+      },
+      "id": "cee2f676-b5ad-4039-9216-9b66d46442f4",
+      "name": "SMS Confirmation",
+      "type": "n8n-nodes-base.twilio",
+      "typeVersion": 1,
+      "position": [
+        5216,
+        -1520
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000,
+      "credentials": {
+        "twilioApi": {
+          "id": "oQy4kmpRVs08OIO9",
+          "name": "Twilio account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "19ekskZGExeGti_9hSGJaCeaOcB3G0E1vxYg9I_yi3no",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Bookings",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [
+            "call_id"
+          ],
+          "schema": [
+            {
+              "id": "call_id",
+              "displayName": "call_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "caller_phone",
+              "displayName": "caller_phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "caller_name",
+              "displayName": "caller_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "caller_email",
+              "displayName": "caller_email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "intent",
+              "displayName": "intent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "appointment_start",
+              "displayName": "appointment_start",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "appointment_end",
+              "displayName": "appointment_end",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "message",
+              "displayName": "message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "call_summary",
+              "displayName": "call_summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "aba75db4-5c15-4aee-9955-7f1f13e4ed4e",
+      "name": "Log Booking",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [
+        5456,
+        -1632
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "aMeTn0TL5vj8xKwm",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## 2. BOOKING\nCalled by the Main Router when intent = booking.\n1. Creates the calendar event\n2. Then sends email + SMS confirmations IN PARALLEL (one failing doesn't block the other)\n3. Logs the booking\nAll external nodes retry 3x automatically.",
+        "height": 208,
+        "width": 420
+      },
+      "id": "fdafd748-cfba-49d1-8eaf-42847bea0f73",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        4736,
+        -1968
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "brendon@wondorabrands.com",
+        "subject": "=New message from {{ $json.caller_name }} ({{ $json.caller_phone }})",
+        "emailType": "text",
+        "message": "=Your AI receptionist took a message:\n\nCaller: {{ $json.caller_name }}\nPhone: {{ $json.caller_phone }}\nEmail: {{ $json.caller_email }}\n\nMessage:\n{{ $json.message }}\n\nFull call summary:\n{{ $json.call_summary }}",
+        "options": {}
+      },
+      "id": "9166e2a1-0dfb-47bf-b2b1-4ea1ac200820",
+      "name": "Email Business Owner",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2,
+      "position": [
+        5040,
+        -992
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000,
+      "webhookId": "187200b4-2d42-44cc-91bd-d35143027bec",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "VPztnIKW33DDWz3p",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "from": "+12392997352",
+        "to": "={{ $json.caller_phone }}",
+        "message": "=Hi {{ $json.caller_name }}, thanks for calling! We received your message and someone will get back to you shortly.",
+        "options": {}
+      },
+      "id": "c2054f8e-5569-4022-959b-d87b91651f2f",
+      "name": "SMS Received Confirmation",
+      "type": "n8n-nodes-base.twilio",
+      "typeVersion": 1,
+      "position": [
+        5040,
+        -784
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000,
+      "credentials": {
+        "twilioApi": {
+          "id": "oQy4kmpRVs08OIO9",
+          "name": "Twilio account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "19ekskZGExeGti_9hSGJaCeaOcB3G0E1vxYg9I_yi3no",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Messages",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "call_id",
+              "displayName": "call_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "caller_phone",
+              "displayName": "caller_phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "caller_name",
+              "displayName": "caller_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "caller_email",
+              "displayName": "caller_email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "intent",
+              "displayName": "intent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "appointment_start",
+              "displayName": "appointment_start",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "appointment_end",
+              "displayName": "appointment_end",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "message",
+              "displayName": "message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "call_summary",
+              "displayName": "call_summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "59f48b89-245e-4111-a820-6fbb3f095932",
+      "name": "Log Message",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [
+        5280,
+        -992
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "aMeTn0TL5vj8xKwm",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## 3. MESSAGE & FOLLOW-UP\nCalled by the Main Router for any non-booking call (message taken, question, missed info).\n1. Emails the business owner the message + call summary\n2. Texts the caller a 'we got your message' confirmation (in parallel)\n3. Logs it",
+        "height": 220,
+        "width": 420
+      },
+      "id": "5067a618-60bd-4365-8dec-a3be17a50fe5",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        4736,
+        -1232
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "retell-call-intake",
+        "options": {}
+      },
+      "id": "4ec5ad61-2410-4cc6-a217-903dfc013fb5",
+      "name": "Retell Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        4736,
+        -80
+      ],
+      "webhookId": "retell-call-intake"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.body.event }}",
+              "value2": "call_analyzed"
+            }
+          ]
+        }
+      },
+      "id": "998a38ad-314b-45b0-939f-3e33fb57c5ce",
+      "name": "Only Final Analyzed Event?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        4960,
+        -80
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1",
+              "name": "call_id",
+              "value": "={{ $json.body.call.call_id }}",
+              "type": "string"
+            },
+            {
+              "id": "a2",
+              "name": "caller_phone",
+              "value": "={{ $json.body.call.from_number }}",
+              "type": "string"
+            },
+            {
+              "id": "a3",
+              "name": "caller_name",
+              "value": "={{ $json.body.call.call_analysis.custom_analysis_data.caller_name }}",
+              "type": "string"
+            },
+            {
+              "id": "a4",
+              "name": "caller_email",
+              "value": "={{ $json.body.call.call_analysis.custom_analysis_data.caller_email }}",
+              "type": "string"
+            },
+            {
+              "id": "a5",
+              "name": "intent",
+              "value": "={{ $json.body.call.call_analysis.custom_analysis_data.intent }}",
+              "type": "string"
+            },
+            {
+              "id": "a6",
+              "name": "appointment_start",
+              "value": "={{ $json.body.call.call_analysis.custom_analysis_data.appointment_start }}",
+              "type": "string"
+            },
+            {
+              "id": "a7",
+              "name": "appointment_end",
+              "value": "={{ $json.body.call.call_analysis.custom_analysis_data.appointment_end }}",
+              "type": "string"
+            },
+            {
+              "id": "a8",
+              "name": "message",
+              "value": "={{ $json.body.call.call_analysis.custom_analysis_data.message }}",
+              "type": "string"
+            },
+            {
+              "id": "a9",
+              "name": "call_summary",
+              "value": "={{ $json.body.call.call_analysis.call_summary }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a9d05eaa-2d74-4814-9a57-0cf9b6cdaceb",
+      "name": "Normalize Call Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        5184,
+        -96
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "removeItemsSeenInPreviousExecutions",
+        "dedupeValue": "={{ $json.call_id }}",
+        "options": {}
+      },
+      "id": "4c059c05-8d5a-46c6-99a8-e362a281d7a8",
+      "name": "Block Duplicate Webhooks",
+      "type": "n8n-nodes-base.removeDuplicates",
+      "typeVersion": 2,
+      "position": [
+        5392,
+        -96
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "19ekskZGExeGti_9hSGJaCeaOcB3G0E1vxYg9I_yi3no",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Call Log",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "call_id",
+              "displayName": "call_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "caller_phone",
+              "displayName": "caller_phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "caller_name",
+              "displayName": "caller_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "caller_email",
+              "displayName": "caller_email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "intent",
+              "displayName": "intent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "appointment_start",
+              "displayName": "appointment_start",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "appointment_end",
+              "displayName": "appointment_end",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "message",
+              "displayName": "message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "call_summary",
+              "displayName": "call_summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "0737acbc-2741-4560-8e59-fc43b6c82918",
+      "name": "Log Call to Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [
+        5616,
+        -96
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "aMeTn0TL5vj8xKwm",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataType": "string",
+        "value1": "={{ $json.intent }}",
+        "rules": {
+          "rules": [
+            {
+              "value2": "booking"
+            },
+            {
+              "value2": "message",
+              "output": 1
+            }
+          ]
+        },
+        "fallbackOutput": 1
+      },
+      "id": "f28000dd-faef-47fd-9a54-6a6c59564b9a",
+      "name": "Route by Intent",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 1,
+      "position": [
+        5840,
+        -96
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 1. CALL INTAKE\nRetell sends every call here. This workflow:\n1. Ignores everything except the final 'call_analyzed' event\n2. Pulls out the fields we care about (ONE place to fix field names)\n3. Blocks duplicate webhook retries\n4. Logs the call to Google Sheets\n5. Routes to the Booking or Message workflow",
+        "height": 260,
+        "width": 420
+      },
+      "id": "6550c8e4-9fc6-45c0-af2e-b3f891a6da08",
+      "name": "Sticky Note3",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        4672,
+        -448
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "njAV9xnSsJiREcFs",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/njAV9xnSsJiREcFs",
+          "cachedResultName": "2 - Booking"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        6064,
+        -304
+      ],
+      "id": "b44b6dab-43cd-4766-9de0-0f4ccba81a6f",
+      "name": "Call '2 - Booking'"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "hw3rdf9VcULfUr60",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/hw3rdf9VcULfUr60",
+          "cachedResultName": "3 - Message & Follow-Up"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        6064,
+        -192
+      ],
+      "id": "648bc017-759d-4fdc-8e5d-e99393ec8cf0",
+      "name": "Call '3 - Message & Follow-Up'"
+    }
+  ],
+  "connections": {
+    "On Any Workflow Error": {
+      "main": [
+        [
+          {
+            "node": "Email Jack the Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Called by Main Router": {
+      "main": [
+        [
+          {
+            "node": "Create Calendar Event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Calendar Event": {
+      "main": [
+        [
+          {
+            "node": "Email Confirmation",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "SMS Confirmation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email Confirmation": {
+      "main": [
+        [
+          {
+            "node": "Log Booking",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email Business Owner": {
+      "main": [
+        [
+          {
+            "node": "Log Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Retell Webhook": {
+      "main": [
+        [
+          {
+            "node": "Only Final Analyzed Event?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Only Final Analyzed Event?": {
+      "main": [
+        [
+          {
+            "node": "Normalize Call Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Call Data": {
+      "main": [
+        [
+          {
+            "node": "Block Duplicate Webhooks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Block Duplicate Webhooks": {
+      "main": [
+        [
+          {
+            "node": "Log Call to Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Call to Sheet": {
+      "main": [
+        [
+          {
+            "node": "Route by Intent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route by Intent": {
+      "main": [
+        [
+          {
+            "node": "Call '2 - Booking'",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Call '3 - Message & Follow-Up'",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "i7lxxYMvVcEHMHdt",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "versionId": "353f1346-f9fd-4666-9666-f1fae4e1a346",
+  "nodeGroups": [],
+  "id": "U1Z8EN0hyzATZ3Gf",
+  "tags": []
+}
