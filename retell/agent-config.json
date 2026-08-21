@@ -1,9 +1,11 @@
 {
-  "snapshot_date": "2026-08-19",
+  "snapshot_date": "2026-08-20",
   "agent": {
     "name": "Wondora V2",
-    "published_version": 14,
-    "version_title": "Direct post-booking close",
+    "published_version": 15,
+    "published_version_title": "Human Conversation and Scheduling Safety",
+    "draft_version": 16,
+    "draft_status": "SMS consent and compliance refinement; not published",
     "phone_assignment": "Latest Published",
     "phone_number": "+12392997352",
     "llm": "GPT 4.1"
@@ -25,7 +27,7 @@
     "language": "English (US)"
   },
   "speech_settings": {
-    "background_sound": "Coffee Shop",
+    "background_sound": "None",
     "response_eagerness": 1.0,
     "dynamic_response_eagerness": false,
     "interruption_sensitivity": 0.9,
@@ -60,8 +62,30 @@
       "transfer_ended"
     ]
   },
+  "post_call_extraction_draft_v16": [
+    {
+      "name": "booking_succeeded",
+      "type": "boolean",
+      "optional": true,
+      "rule": "True only after book_appointment_cal returns success and Isabella confirms the booking; false for a failed or incomplete booking; empty when no booking was attempted."
+    },
+    {
+      "name": "sms_consent_granted",
+      "type": "boolean",
+      "optional": true,
+      "rule": "True only after the post-booking consent question receives a clear affirmative answer; false only for a clear decline; otherwise empty."
+    },
+    {
+      "name": "sms_consent_evidence",
+      "type": "text",
+      "optional": true,
+      "rule": "Quote or closely transcribe the SMS consent question and caller response; otherwise empty."
+    }
+  ],
   "notes": [
-    "The editor showed an unchanged V15 draft from V14 with Publish disabled; V14 remains the latest published production version.",
-    "The V14-derived function list showed three attached functions. The prompt references transfer_call, so transfer attachment and destination must be verified manually during a restore."
+    "V15 is the latest published production version. SMS consent work is isolated in the unpublished V16 draft.",
+    "No transfer function is attached. The previously documented destination is unverified, so the draft uses message-taking as the safe fallback.",
+    "The stale Wonder Knowledge Base remains detached from V15 and the V16 draft.",
+    "Coffee Shop and no-background audio variants were exercised in draft Test Audio. The no-background variant is retained for cleaner, more professional telephone speech."
   ]
 }

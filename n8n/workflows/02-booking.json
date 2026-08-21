@@ -16,6 +16,53 @@
     },
     {
       "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst callId = typeof input.call_id === 'string' ? input.call_id.trim() : '';\nconst callerPhone = typeof input.caller_phone === 'string' ? input.caller_phone.trim() : '';\nconst appointmentStart = typeof input.appointment_start === 'string' ? input.appointment_start.trim() : '';\nconst consentGranted = input.sms_consent_granted === true;\nconst bookingSucceeded = input.booking_succeeded === true;\nconst phoneIsValid = /^\\+[1-9]\\d{7,14}$/.test(callerPhone);\nconst appointmentDate = new Date(appointmentStart);\nconst appointmentIsValid = appointmentStart !== '' && !Number.isNaN(appointmentDate.getTime());\n\nlet skipReason = '';\nif (!callId) skipReason = 'missing_call_id';\nelse if (!bookingSucceeded) skipReason = 'booking_not_successful';\nelse if (!phoneIsValid) skipReason = callerPhone ? 'invalid_caller_phone' : 'missing_caller_phone';\nelse if (!consentGranted) skipReason = 'sms_consent_not_granted';\nelse if (!appointmentIsValid) skipReason = 'missing_or_invalid_appointment_start';\n\nconst state = $getWorkflowStaticData('global');\nstate.smsByCallId = state.smsByCallId || {};\nif (!skipReason && state.smsByCallId[callId]) skipReason = 'duplicate_call_id';\n\nlet smsBody = '';\nif (!skipReason) {\n  const easternTime = new Intl.DateTimeFormat('en-US', {\n    timeZone: 'America/New_York',\n    weekday: 'long',\n    month: 'long',\n    day: 'numeric',\n    hour: 'numeric',\n    minute: '2-digit',\n    hour12: true,\n  }).format(appointmentDate);\n  smsBody = `Wondora Brands: Your consultation is booked for ${easternTime} Eastern. Reply STOP to unsubscribe.`;\n  state.smsByCallId[callId] = {\n    status: 'claimed',\n    claimed_at: new Date().toISOString(),\n    caller_phone: callerPhone,\n    appointment_start: appointmentStart,\n  };\n}\n\nconst consentTimestamp = input.sms_consent_timestamp || '';\nconst consentRecord = JSON.stringify({\n  call_id: callId,\n  caller_phone: callerPhone,\n  consent_granted: consentGranted,\n  consent_timestamp: consentTimestamp,\n  appointment_start: appointmentStart,\n  source: input.sms_consent_source || 'voice_call',\n  evidence: input.sms_consent_evidence || '',\n  original_message: input.message || '',\n  sms_eligible: !skipReason,\n  sms_skip_reason: skipReason,\n});\n\nreturn [{ json: {\n  ...input,\n  sms_eligible: !skipReason,\n  sms_skip_reason: skipReason,\n  sms_body: smsBody,\n  sms_consent_record: consentRecord,\n} }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        0
+      ],
+      "id": "0ef5b1ac-f979-4a25-9397-3f01d58b6237",
+      "name": "Evaluate and Claim SMS Attempt"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "be4900ed-b934-4e20-b99f-b55a52793675",
+              "leftValue": "={{ $json.sms_eligible }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        672,
+        176
+      ],
+      "id": "eef5d8ae-4fd1-43ee-ad7b-ab7e3f830e56",
+      "name": "SMS Eligible?"
+    },
+    {
+      "parameters": {
         "calendar": {
           "__rl": true,
           "value": "b4fc40e9bb0fb683b2ef40e485172be70db3a29a2bb3e69c17508199285adf7d@group.calendar.google.com",
@@ -56,7 +103,7 @@
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.2,
       "position": [
-        448,
+        672,
         0
       ],
       "id": "25af41e8-4c22-4ca2-a7ff-88c331e79786",
@@ -72,14 +119,14 @@
     {
       "parameters": {
         "from": "+12392997352",
-        "to": "={{ $('When Executed by Another Workflow').item.json.caller_phone }}",
-        "message": "=Hi {{ $('When Executed by Another Workflow').item.json.caller_name }}, your appointment is confirmed for {{ $('When Executed by Another Workflow').item.json.appointment_start }}",
+        "to": "={{ $('Evaluate and Claim SMS Attempt').item.json.caller_phone }}",
+        "message": "={{ $('Evaluate and Claim SMS Attempt').item.json.sms_body }}",
         "options": {}
       },
       "type": "n8n-nodes-base.twilio",
       "typeVersion": 1,
       "position": [
-        48,
+        896,
         176
       ],
       "id": "8f301f13-f673-4afe-bc6c-65e144623891",
@@ -90,6 +137,19 @@
           "name": "Twilio account"
         }
       }
+    },
+    {
+      "parameters": {
+        "jsCode": "const source = $('Evaluate and Claim SMS Attempt').item.json;\nconst twilioResult = $input.first().json;\nconst state = $getWorkflowStaticData('global');\nstate.smsByCallId = state.smsByCallId || {};\nstate.smsByCallId[source.call_id] = {\n  ...(state.smsByCallId[source.call_id] || {}),\n  status: 'submitted',\n  submitted_at: new Date().toISOString(),\n  twilio_message_sid: twilioResult.sid || twilioResult.messageSid || '',\n};\nreturn [{ json: { ...source, sms_attempted: true, twilio_result: twilioResult } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1120,
+        176
+      ],
+      "id": "70f9b2c2-9500-4209-af1c-bac4937ad590",
+      "name": "Mark SMS Submitted"
     },
     {
       "parameters": {
@@ -118,7 +178,7 @@
             "intent": "={{ $('When Executed by Another Workflow').item.json.intent }}",
             "appointment_start": "={{ $('When Executed by Another Workflow').item.json.appointment_start }}",
             "appointment_end": "={{ $('When Executed by Another Workflow').item.json.appointment_end }}",
-            "message": "={{ $('When Executed by Another Workflow').item.json.message }}",
+            "message": "={{ $('Evaluate and Claim SMS Attempt').item.json.sms_consent_record }}",
             "call_summary": "={{ $('When Executed by Another Workflow').item.json.call_summary }}"
           },
           "matchingColumns": [],
@@ -222,7 +282,7 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
       "position": [
-        672,
+        896,
         0
       ],
       "id": "0c0072f0-424a-41ff-a511-23ed1fa34fb0",
@@ -251,12 +311,46 @@
       "main": [
         [
           {
+            "node": "Evaluate and Claim SMS Attempt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Evaluate and Claim SMS Attempt": {
+      "main": [
+        [
+          {
             "node": "Send a message",
             "type": "main",
             "index": 0
           },
           {
+            "node": "SMS Eligible?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SMS Eligible?": {
+      "main": [
+        [
+          {
             "node": "Send an SMS/MMS/WhatsApp message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Send an SMS/MMS/WhatsApp message": {
+      "main": [
+        [
+          {
+            "node": "Mark SMS Submitted",
             "type": "main",
             "index": 0
           }

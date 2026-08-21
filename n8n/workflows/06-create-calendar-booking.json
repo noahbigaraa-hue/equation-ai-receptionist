@@ -26,8 +26,8 @@
           "mode": "list",
           "cachedResultName": "Equation Discovery Calls"
         },
-        "start": "={{ $json.body?.args?.start_time || $json.body?.start_time || $json.args?.start_time || $json.start_time }}",
-        "end": "={{ DateTime.fromISO($json.body?.args?.start_time || $json.body?.start_time || $json.args?.start_time || $json.start_time).setZone('America/New_York').plus({ minutes: 30 }).toISO() }}",
+        "start": "={{ (() => { const start = DateTime.fromISO($json.body?.args?.start_time || $json.body?.start_time || $json.args?.start_time || $json.start_time).setZone('America/New_York'); const now = DateTime.now().setZone('America/New_York'); if (!start.isValid) throw new Error('INVALID_APPOINTMENT_START'); if (start <= now) throw new Error('PAST_APPOINTMENT_REJECTED'); return start.toISO(); })() }}",
+        "end": "={{ (() => { const start = DateTime.fromISO($json.body?.args?.start_time || $json.body?.start_time || $json.args?.start_time || $json.start_time).setZone('America/New_York'); const now = DateTime.now().setZone('America/New_York'); if (!start.isValid) throw new Error('INVALID_APPOINTMENT_START'); if (start <= now) throw new Error('PAST_APPOINTMENT_REJECTED'); return start.plus({ minutes: 30 }).toISO(); })() }}",
         "additionalFields": {
           "description": "=Booked by Wondora AI Receptionist\n\nCaller: {{ $json.body?.args?.caller_name || $json.body?.caller_name || $json.args?.caller_name || $json.caller_name }}\nPhone: {{ $json.body?.args?.caller_phone || $json.body?.caller_phone || $json.args?.caller_phone || $json.caller_phone }}\nEmail: {{ $json.body?.args?.caller_email || $json.body?.caller_email || $json.args?.caller_email || $json.caller_email || 'Not provided' }}\nConfirmed appointment: {{ DateTime.fromISO($json.body?.args?.start_time || $json.body?.start_time || $json.args?.start_time || $json.start_time).setZone('America/New_York').toFormat(\"cccc, LLLL d, yyyy 'at' h:mm a\") }} Eastern\nBusiness timezone: Eastern Time (America/New_York)\nRetell Call ID: {{ $json.body?.call?.call_id || $json.body?.call_id || $json.call_id || 'Unavailable' }}",
           "id": "={{ ('wondora' + ($json.body?.call?.call_id || $json.body?.call_id || $json.call_id || $json.body?.args?.caller_phone || $json.body?.caller_phone || $json.args?.caller_phone || $json.caller_phone || 'unknown') + ($json.body?.args?.start_time || $json.body?.start_time || $json.args?.start_time || $json.start_time)).toLowerCase().replace(/[^a-v0-9]/g, '').slice(0, 100) }}",
@@ -46,9 +46,8 @@
         "googleCalendarOAuth2Api": {
           "id": "7pyExXcOIsdwosTU",
           "name": "Google Calendar account 2"
-        }
-      },
-      "onError": "continueRegularOutput"
+      }
+    }
     },
     {
       "parameters": {

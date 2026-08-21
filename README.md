@@ -1,12 +1,12 @@
 # Equation AI Receptionist
 
-Private, restorable baseline of the working Wondora production receptionist as of August 19, 2026.
+Private, restorable configuration and refinement history for the working Wondora production receptionist as of August 20, 2026.
 
 ## Current production architecture
 
 ```mermaid
 flowchart LR
-    A["Caller<br/>+1 239 299 7352"] --> B["Retell AI<br/>Wondora V2 / Latest Published V14"]
+    A["Caller<br/>+1 239 299 7352"] --> B["Retell AI<br/>Wondora V2 / Latest Published V15"]
     B -->|"availability"| E["n8n Workflow 5"]
     B -->|"booking"| F["n8n Workflow 6"]
     B -->|"call events"| C["n8n Workflow 1"]
@@ -22,7 +22,8 @@ Phone → Retell AI → n8n → Google Calendar → email/SMS/logging.
 | Component | Production setting |
 |---|---|
 | Retell agent | Wondora V2 |
-| Published version | V14 — Direct post-booking close |
+| Published version | V15 — Human Conversation and Scheduling Safety |
+| Compliance draft | V16 — explicit post-booking SMS consent; not published |
 | Phone assignment | Latest Published |
 | Phone number | +1 239 299 7352 |
 | Voice | Cimo |
@@ -34,7 +35,7 @@ Phone → Retell AI → n8n → Google Calendar → email/SMS/logging.
 ## Production workflows
 
 1. **Main Call Router (Retell Intake)** — Receives Retell events, accepts only the final `call_analyzed` event, normalizes call data, blocks duplicate webhook deliveries, logs the call, and routes it to Workflow 2 or 3.
-2. **Booking** — Performs post-call booking follow-up: confirmation email, confirmation SMS, and logging. Its Google Calendar node is deactivated. It must not create calendar events.
+2. **Booking** — Performs post-call booking follow-up and logging. The prepared draft sends an SMS only after deterministic booking-success, phone, explicit-consent, call-ID, and deduplication checks. Its Google Calendar node is deactivated. It must not create calendar events.
 3. **Message & Follow-Up** — Emails the business owner, sends the caller a received-message SMS, and logs non-booking outcomes.
 4. **Error Handler** — Receives n8n workflow failures and emails the configured operator.
 5. **Check Calendar Availability** — Checks the calendar once for the requested window. If unavailable, it returns the three nearest valid 30-minute alternatives during Monday–Friday, 9 AM–5 PM Eastern.
@@ -64,6 +65,8 @@ Workflow 6 is the sole owner of calendar creation in the live production path. W
 
 Workflow 6 generates a deterministic Google event ID from the Retell call identity plus appointment start time. Repeating the same booking request therefore cannot create a second event.
 
+Workflow 1 deduplicates final Retell webhook deliveries by `call_id`. The prepared Workflow 2 compliance draft adds its own call-scoped SMS-attempt claim so a duplicate event cannot cause a second SMS attempt. Consent evidence remains tied to that call and is stored through the existing Bookings logging path.
+
 ## Availability behavior
 
 Workflow 5 searches the `Equation Discovery Calls` calendar in Eastern Time. It enforces:
@@ -84,10 +87,12 @@ Retell's platform Welcome Message speaks first. The system prompt explicitly pre
 
 - `n8n/workflows/` — Sanitized production workflow exports.
 - `retell/agent-config.json` — Reconstructed published agent settings.
-- `retell/system-prompt.md` — Current V14 prompt.
+- `retell/system-prompt.md` — Branch-specific Retell handbook (V14 on the protected baseline; unpublished V15 refinement on the refinement branch).
 - `retell/functions.md` — Function descriptions, schemas, and endpoints.
 - `retell/webhooks.md` — Agent-level webhook configuration.
 - `docs/RESTORE.md` — Rebuild and validation procedure.
 - `docs/PRODUCTION-SAFETY.md` — Rules that must remain true.
+- `docs/SMS-COMPLIANCE.md` — Primary Profile status, consent flow, Workflow 2 gates, A2P preparation, fees, STOP/HELP behavior, and remaining approvals.
+- `n8n/tests/workflow-02-sms-gating.test.mjs` — Carrier-independent SMS eligibility and deduplication tests.
 
 No credentials, tokens, pinned execution samples, browser data, or environment-variable values are stored here.

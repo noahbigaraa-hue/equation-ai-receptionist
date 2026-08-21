@@ -6,6 +6,8 @@
 
 > Checks whether the caller's requested appointment window is available. Use this during a booking flow before offering or confirming any appointment time. Wait for and use the returned availability result; never end the call while this function is pending.
 
+The start must be a valid future time in `America/New_York`. Retell rejects past times conversationally, and Workflow 5 independently rejects them before querying Google Calendar.
+
 - Method: `POST`
 - Endpoint: `https://equation-us.app.n8n.cloud/webhook/check-availability`
 - Timeout: `120000` ms
@@ -35,6 +37,8 @@
 **Description**
 
 > Creates the confirmed Marketing Consulting appointment after the caller has approved the exact date and time. Use only after a successful availability check and explicit caller confirmation. Wait for the success response and communicate the booking outcome before any end_call.
+
+The confirmed start must be a valid future time in `America/New_York`. Workflow 6 independently rejects invalid or past starts before the Google Calendar create request, and always derives an exact 30-minute end.
 
 - Method: `POST`
 - Endpoint: `https://equation-us.app.n8n.cloud/webhook/book-appointment`
@@ -84,8 +88,8 @@ Retell's End Call function is attached as `end_call` with the platform descripti
 
 > End the call when user has to leave (like says bye) or you are instructed to do so.
 
-The system prompt adds the production guardrails: it may not fire during availability or booking, and it may fire only after a booking result has been communicated, the caller cancels/declines, a transfer completes, or a normal closing exchange finishes.
+The draft guardrails prohibit `end_call` during any tool call, while caller confirmation is pending, or immediately after saying that something will be checked. It is permitted only after the spoken final outcome and a completed booking, cancellation, message, or normal closing.
 
-## Transfer note
+## Transfer status
 
-The system prompt references `transfer_call` to the business main number, but the V14-derived Functions panel showed only `end_call`, `check_availability_cal`, and `book_appointment_cal`. Do not assume transfer is available after a restore; inspect and configure it deliberately before testing transfer behavior.
+No `transfer_call` function is attached. The previously documented destination has not been verified, so the unpublished refinement uses message-taking as the fallback. Do not add or activate a transfer function until the destination is independently verified and a controlled transfer test is approved.

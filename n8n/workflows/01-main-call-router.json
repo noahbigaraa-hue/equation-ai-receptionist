@@ -577,6 +577,36 @@
               "name": "call_summary",
               "value": "={{ $json.body.call.call_analysis.call_summary }}",
               "type": "string"
+            },
+            {
+              "id": "a10",
+              "name": "booking_succeeded",
+              "value": "={{ $json.body.call.call_analysis.custom_analysis_data.booking_succeeded }}",
+              "type": "boolean"
+            },
+            {
+              "id": "a11",
+              "name": "sms_consent_granted",
+              "value": "={{ $json.body.call.call_analysis.custom_analysis_data.sms_consent_granted }}",
+              "type": "boolean"
+            },
+            {
+              "id": "a12",
+              "name": "sms_consent_evidence",
+              "value": "={{ $json.body.call.call_analysis.custom_analysis_data.sms_consent_evidence }}",
+              "type": "string"
+            },
+            {
+              "id": "a13",
+              "name": "sms_consent_timestamp",
+              "value": "={{ $json.body.call.end_timestamp }}",
+              "type": "string"
+            },
+            {
+              "id": "a14",
+              "name": "sms_consent_source",
+              "value": "voice_call",
+              "type": "string"
             }
           ]
         },

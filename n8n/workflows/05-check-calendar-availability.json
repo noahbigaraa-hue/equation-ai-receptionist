@@ -39,12 +39,12 @@
         "calendar": {
           "__rl": true,
           "value": "b4fc40e9bb0fb683b2ef40e485172be70db3a29a2bb3e69c17508199285adf7d@group.calendar.google.com",
-          "mode": "list",
+          "mode": "id",
           "cachedResultName": "Equation Discovery Calls"
         },
         "returnAll": true,
-        "timeMin": "={{ DateTime.fromISO($json.body?.start_time || $json.body?.args?.start_time || $json.start_time || $json.args?.start_time).setZone('America/New_York').minus({ days: 3 }).startOf('day').set({ hour: 9 }) }}",
-        "timeMax": "={{ DateTime.fromISO($json.body?.start_time || $json.body?.args?.start_time || $json.start_time || $json.args?.start_time).setZone('America/New_York').plus({ days: 3 }).startOf('day').set({ hour: 17 }) }}",
+        "timeMin": "={{ (() => { const start = DateTime.fromISO($json.body?.start_time || $json.body?.args?.start_time || $json.start_time || $json.args?.start_time).setZone('America/New_York'); const now = DateTime.now().setZone('America/New_York'); if (!start.isValid) throw new Error('INVALID_APPOINTMENT_START'); if (start <= now) throw new Error('PAST_APPOINTMENT_REJECTED'); return start.minus({ days: 3 }).startOf('day').set({ hour: 9 }); })() }}",
+        "timeMax": "={{ (() => { const start = DateTime.fromISO($json.body?.start_time || $json.body?.args?.start_time || $json.start_time || $json.args?.start_time).setZone('America/New_York'); const now = DateTime.now().setZone('America/New_York'); if (!start.isValid) throw new Error('INVALID_APPOINTMENT_START'); if (start <= now) throw new Error('PAST_APPOINTMENT_REJECTED'); return start.plus({ days: 3 }).startOf('day').set({ hour: 17 }); })() }}",
         "options": {}
       },
       "type": "n8n-nodes-base.googleCalendar",
