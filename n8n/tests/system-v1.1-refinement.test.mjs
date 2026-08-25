@@ -150,6 +150,12 @@ const enabledRouterCalendarWriters = router.nodes.filter((node) =>
   && (!node.parameters.operation || node.parameters.operation === 'create' || node.parameters.operation === 'update')
 );
 assert.deepEqual(enabledRouterCalendarWriters, []);
+const allEnabledRouterCalendarWriters = router.nodes.filter((node) =>
+  node.type === 'n8n-nodes-base.googleCalendar'
+  && !node.disabled
+  && (!node.parameters.operation || node.parameters.operation === 'create' || node.parameters.operation === 'update')
+);
+assert.deepEqual(allEnabledRouterCalendarWriters, [], 'Workflow 1 must not contain any enabled calendar writer');
 for (const workflow of [booking, message, errorHandler, availability]) {
   const enabledWriters = workflow.nodes.filter((node) =>
     node.type === 'n8n-nodes-base.googleCalendar'
