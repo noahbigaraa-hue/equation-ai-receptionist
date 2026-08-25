@@ -1,12 +1,14 @@
 {
-  "snapshot_date": "2026-08-20",
+  "snapshot_date": "2026-08-25",
   "agent": {
     "name": "Wondora V2",
     "published_version": 15,
     "published_version_title": "Human Conversation and Scheduling Safety",
-    "draft_version": 16,
-    "draft_status": "SMS consent and compliance refinement; not published",
-    "phone_assignment": "Latest Published",
+    "live_inbound_version": 16,
+    "live_inbound_status": "Draft pinned explicitly; preserved during V1.1 work",
+    "draft_version": 17,
+    "draft_status": "The System V.1.1 refinement; not published and not assigned to the phone",
+    "phone_assignment": "Pinned to V16 Draft",
     "phone_number": "+12392997352",
     "llm": "GPT 4.1"
   },
@@ -14,7 +16,7 @@
     "mode": "AI speaks first",
     "type": "Custom message",
     "pause_before_speaking_seconds": 0,
-    "text": "Howzit, thanks for calling Wondora. I'm Isabella, how can I help you today?"
+    "text": "Hey, this is Isabella from Wondora Brands. How can I help you today?"
   },
   "voice": {
     "name": "Cimo",
@@ -33,6 +35,14 @@
     "interruption_sensitivity": 0.9,
     "reminder_frequency_seconds": 10,
     "reminder_max_times": 1
+  },
+  "transcription_settings": {
+    "denoising_mode": "Remove noise",
+    "transcription_mode": "Optimize for speed",
+    "vocabulary_specialization": "General",
+    "boosted_keywords": [
+      "Wondora"
+    ]
   },
   "business": {
     "timezone": "America/New_York",
@@ -62,7 +72,7 @@
       "transfer_ended"
     ]
   },
-  "post_call_extraction_draft_v16": [
+  "post_call_extraction_draft_v17": [
     {
       "name": "booking_succeeded",
       "type": "boolean",
@@ -83,9 +93,11 @@
     }
   ],
   "notes": [
-    "V15 is the latest published production version. SMS consent work is isolated in the unpublished V16 draft.",
+    "V15 remains the latest published Retell version. The live inbound phone was observed pinned to V16 Draft before V1.1 work began and is not changed by this draft.",
+    "V17 is the isolated V1.1 draft. It keeps Cimo, speed 1.12, temperature 1.0, and volume 1.0 because no tested setting change demonstrated a clear improvement. It is not assigned to the live phone.",
     "No transfer function is attached. The previously documented destination is unverified, so the draft uses message-taking as the safe fallback.",
-    "The stale Wonder Knowledge Base remains detached from V15 and the V16 draft.",
-    "Coffee Shop and no-background audio variants were exercised in draft Test Audio. The no-background variant is retained for cleaner, more professional telephone speech."
+    "The stale Wonder Knowledge Base remains detached from V15, V16, and the V17 draft.",
+    "Coffee Shop and no-background audio variants were exercised previously, and a short V17 Static Noise sample was generated. No background sound is retained because no ambience option demonstrated a clearer or more professional result than None.",
+    "Cimo does not support Retell pronunciation dictionaries. V1.1 uses concise handbook guidance plus the boosted keyword Wondora for the Won-Dor-Ah pronunciation."
   ]
 }

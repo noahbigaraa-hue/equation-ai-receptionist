@@ -27,3 +27,25 @@ Workflow 2's prepared draft:
 - keeps its Google Calendar node disabled.
 
 The test harness at `../tests/workflow-02-sms-gating.test.mjs` executes the Code node embedded in the export. These refinements must not be published until Retell V16 simulation passes and A2P enablement is approved.
+
+## The System V.1.1 enrichment draft
+
+Workflow 1 adds these raw Call Log fields without changing existing columns:
+
+- `call_started_at`
+- `call_ended_at`
+- `call_duration_seconds`
+- `recording_url`
+- `booking_created_at`
+- `call_summary_link`
+
+After the final `call_analyzed` event is deduplicated and logged, a separate branch calls Workflow 6 only when `booking_succeeded` is exactly true and both `call_id` and `appointment_start` exist. Errors on this optional enrichment branch do not block the established Workflow 2/3 follow-up route.
+
+Workflow 6 retains the original webhook-to-create-to-response booking path. Its additional execute-workflow trigger validates the post-call payload, derives the same deterministic event ID used at creation, retrieves the event, and appends final call duration, summary, Client View, and the real Retell `recording_url`. This design keeps Workflow 6 as the sole calendar writer.
+
+Run both release checks before any import or publish:
+
+```bash
+node n8n/tests/workflow-02-sms-gating.test.mjs
+node n8n/tests/system-v1.1-refinement.test.mjs
+```

@@ -3,6 +3,7 @@
 These rules protect the proven working configuration.
 
 - Workflow 6 is the **only** calendar writer in the live call path.
+- Workflow 1 may call Workflow 6's post-call enrichment trigger only after `booking_succeeded === true` and non-empty call/appointment identifiers. Workflow 1 must never update Google Calendar directly.
 - Do not connect or invoke Workflow 1's retained older embedded subworkflow-trigger groups; they are outside the live Retell webhook route.
 - Workflow 2 handles follow-up only; its calendar node remains deactivated.
 - Never send a booking-confirmation SMS unless `booking_succeeded` and `sms_consent_granted` are exactly true, `call_id` and a valid caller number exist, and that call ID has not already claimed an SMS attempt.
@@ -24,6 +25,9 @@ These rules protect the proven working configuration.
 - Retell webhook payloads may place tool inputs inside `body.args`; direct payload compatibility must also remain.
 - Duplicate booking requests must be idempotent.
 - The deterministic event ID continues to use Retell call identity plus appointment start.
+- Calendar enrichment must retrieve that deterministic event before updating it, preserve the original booking-time description, and append only real post-call data.
+- Use only Retell's actual `recording_url` from the final call payload. Never construct or guess a Retell recording URL.
+- Keep the raw Google Sheet tabs and schemas intact. Client-facing presentation changes belong in the additive `Client View` tab.
 - The platform Welcome Message is the only greeting; the LLM must not introduce itself again.
 - Do not invoke `end_call` while availability or booking is pending.
 - Do not attach or claim a live transfer until the destination is independently verified; use message-taking meanwhile.

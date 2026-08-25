@@ -8,7 +8,7 @@ The immutable production capture for **The System V.1** is in [`snapshots/the-sy
 
 ```mermaid
 flowchart LR
-    A["Caller<br/>+1 239 299 7352"] --> B["Retell AI<br/>Wondora V2 / Latest Published V15"]
+    A["Caller<br/>+1 239 299 7352"] --> B["Retell AI<br/>Wondora V2 / phone pinned to V16 Draft"]
     B -->|"availability"| E["n8n Workflow 5"]
     B -->|"booking"| F["n8n Workflow 6"]
     B -->|"call events"| C["n8n Workflow 1"]
@@ -26,6 +26,7 @@ Phone → Retell AI → n8n → Google Calendar → email/SMS/logging.
 | Retell agent | Wondora V2 |
 | Published version | V15 — Human Conversation and Scheduling Safety |
 | Compliance draft | V16 — explicit post-booking SMS consent; not published |
+| V1.1 refinement draft | V17 — The System V.1.1; not published and not assigned to the phone |
 | Phone assignment | Pinned to V16 Draft as observed August 25, 2026 |
 | Phone number | +1 239 299 7352 |
 | Voice | Cimo |
@@ -41,7 +42,7 @@ Phone → Retell AI → n8n → Google Calendar → email/SMS/logging.
 3. **Message & Follow-Up** — Emails the business owner, sends the caller a received-message SMS, and logs non-booking outcomes.
 4. **Error Handler** — Receives n8n workflow failures and emails the configured operator.
 5. **Check Calendar Availability** — Checks the calendar once for the requested window. If unavailable, it returns the three nearest valid 30-minute alternatives during Monday–Friday, 9 AM–5 PM Eastern.
-6. **Create Calendar Booking** — The only calendar writer. It accepts Retell's nested `body.args` request format as well as direct payloads, creates the 30-minute event, includes caller details and Eastern Time context, and returns the result to Retell.
+6. **Create Calendar Booking** — The only calendar writer. It accepts Retell's nested `body.args` request format as well as direct payloads, creates the 30-minute event, and owns the isolated V1.1 post-call calendar-enrichment branch.
 
 The sanitized, importable exports are in [`n8n/workflows`](n8n/workflows). Workflow 1's exact production export still contains older embedded subworkflow-trigger groups on the same canvas. They are not connected to the live Retell webhook route; the live route calls the separate Workflow 2 and Workflow 3 exports. They are preserved for snapshot fidelity and must not be invoked as calendar writers.
 
@@ -81,9 +82,17 @@ Workflow 5 searches the `Equation Discovery Calls` calendar in Eastern Time. It 
 
 ## Greeting
 
-> Howzit, thanks for calling Wondora. I'm Isabella, how can I help you today?
+> Hey, this is Isabella from Wondora Brands. How can I help you today?
 
 Retell's platform Welcome Message speaks first. The system prompt explicitly prevents a second introduction.
+
+## The System V.1.1 controlled draft
+
+The unpublished V1.1 branch adds call start/end timestamps, duration, the real Retell `recording_url`, booking-completion time, and a stable Client View link to Workflow 1's raw call-log mapping. Workflow 6 remains the only calendar writer: the live booking branch creates the deterministic event, while an isolated post-call branch retrieves that same event and appends final call duration, summary, and recording details.
+
+The production Google Sheet retains `Call Log`, `Bookings`, and `Messages`. A new additive `Client View` tab presents the same records with frozen, branded headers and client-facing columns. The stable fallback link is the Client View tab plus Retell Call ID; no unstable row number is generated.
+
+V17 keeps Cimo, speed `1.12`, response eagerness `1.0`, interruption sensitivity `0.9`, and background sound `None`. Voice temperature and volume remain `1.0`; prompt wording and the exact welcome message supply the energy refinement without an unsupported global voice change.
 
 ## Repository map
 

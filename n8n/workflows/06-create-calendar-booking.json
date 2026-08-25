@@ -29,7 +29,7 @@
         "start": "={{ (() => { const start = DateTime.fromISO($json.body?.args?.start_time || $json.body?.start_time || $json.args?.start_time || $json.start_time).setZone('America/New_York'); const now = DateTime.now().setZone('America/New_York'); if (!start.isValid) throw new Error('INVALID_APPOINTMENT_START'); if (start <= now) throw new Error('PAST_APPOINTMENT_REJECTED'); return start.toISO(); })() }}",
         "end": "={{ (() => { const start = DateTime.fromISO($json.body?.args?.start_time || $json.body?.start_time || $json.args?.start_time || $json.start_time).setZone('America/New_York'); const now = DateTime.now().setZone('America/New_York'); if (!start.isValid) throw new Error('INVALID_APPOINTMENT_START'); if (start <= now) throw new Error('PAST_APPOINTMENT_REJECTED'); return start.plus({ minutes: 30 }).toISO(); })() }}",
         "additionalFields": {
-          "description": "=Booked by Wondora AI Receptionist\n\nCaller: {{ $json.body?.args?.caller_name || $json.body?.caller_name || $json.args?.caller_name || $json.caller_name }}\nPhone: {{ $json.body?.args?.caller_phone || $json.body?.caller_phone || $json.args?.caller_phone || $json.caller_phone }}\nEmail: {{ $json.body?.args?.caller_email || $json.body?.caller_email || $json.args?.caller_email || $json.caller_email || 'Not provided' }}\nConfirmed appointment: {{ DateTime.fromISO($json.body?.args?.start_time || $json.body?.start_time || $json.args?.start_time || $json.start_time).setZone('America/New_York').toFormat(\"cccc, LLLL d, yyyy 'at' h:mm a\") }} Eastern\nBusiness timezone: Eastern Time (America/New_York)\nRetell Call ID: {{ $json.body?.call?.call_id || $json.body?.call_id || $json.call_id || 'Unavailable' }}",
+          "description": "=WONDORA BRANDS CONSULTATION\n\nBOOKING\nConfirmed appointment: {{ DateTime.fromISO($json.body?.args?.start_time || $json.body?.start_time || $json.args?.start_time || $json.start_time).setZone('America/New_York').toFormat(\"cccc, LLLL d, yyyy 'at' h:mm a\") }} Eastern\nBooked on call: {{ DateTime.now().setZone('America/New_York').toFormat(\"cccc, LLLL d, yyyy 'at' h:mm:ss a\") }} Eastern\nBusiness timezone: Eastern Time (America/New_York)\n\nCALLER\nName: {{ $json.body?.args?.caller_name || $json.body?.caller_name || $json.args?.caller_name || $json.caller_name || 'Not provided' }}\nPhone: {{ $json.body?.args?.caller_phone || $json.body?.caller_phone || $json.args?.caller_phone || $json.caller_phone || 'Not provided' }}\nEmail: {{ $json.body?.args?.caller_email || $json.body?.caller_email || $json.args?.caller_email || $json.caller_email || 'Not provided' }}\n\nCALL REFERENCES\nCall started: {{ (() => { const raw = Number($json.body?.call?.start_timestamp || $json.body?.start_timestamp || $json.start_timestamp || 0); return raw ? DateTime.fromMillis(raw < 1000000000000 ? raw * 1000 : raw).setZone('America/New_York').toFormat(\"cccc, LLLL d, yyyy 'at' h:mm:ss a\") + ' Eastern' : 'Available after call completion'; })() }}\nDuration: Available after call completion\nRetell Call ID: {{ $json.body?.call?.call_id || $json.body?.call_id || $json.call_id || 'Unavailable' }}\nClient call view: https://docs.google.com/spreadsheets/d/19ekskZGExeGti_9hSGJaCeaOcB3G0E1vxYg9I_yi3no/edit?gid=1129582252#gid=1129582252\nFull recording: Available after call completion",
           "id": "={{ ('wondora' + ($json.body?.call?.call_id || $json.body?.call_id || $json.call_id || $json.body?.args?.caller_phone || $json.body?.caller_phone || $json.args?.caller_phone || $json.caller_phone || 'unknown') + ($json.body?.args?.start_time || $json.body?.start_time || $json.args?.start_time || $json.start_time)).toLowerCase().replace(/[^a-v0-9]/g, '').slice(0, 100) }}",
           "summary": "=Marketing Consultation — {{ $json.body?.args?.caller_name || $json.body?.caller_name || $json.args?.caller_name || $json.caller_name }} — {{ DateTime.fromISO($json.body?.args?.start_time || $json.body?.start_time || $json.args?.start_time || $json.start_time).setZone('America/New_York').toFormat('h:mm a') }} ET"
         }
@@ -46,8 +46,8 @@
         "googleCalendarOAuth2Api": {
           "id": "7pyExXcOIsdwosTU",
           "name": "Google Calendar account 2"
+        }
       }
-    }
     },
     {
       "parameters": {
@@ -63,6 +63,89 @@
       ],
       "id": "78cf2346-d844-4d15-b50c-e6d379b6ac5e",
       "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        272
+      ],
+      "id": "c0a16000-0000-4000-8000-000000000001",
+      "name": "When Called for Calendar Enrichment"
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $input.first().json;\nconst callId = typeof input.call_id === 'string' ? input.call_id.trim() : '';\nconst appointmentStart = typeof input.appointment_start === 'string' ? input.appointment_start.trim() : '';\nif (input.booking_succeeded !== true || !callId || !appointmentStart) return [];\nconst appointment = new Date(appointmentStart);\nif (Number.isNaN(appointment.getTime())) return [];\nconst eventId = ('wondora' + callId + appointmentStart).toLowerCase().replace(/[^a-v0-9]/g, '').slice(0, 100);\nconst formatEastern = (value) => {\n  if (!value) return 'Unavailable';\n  const date = new Date(value);\n  if (Number.isNaN(date.getTime())) return 'Unavailable';\n  return new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true, timeZoneName: 'short' }).format(date);\n};\nconst duration = Number(input.call_duration_seconds || 0);\nconst completionDetails = [\n  'CALL COMPLETION DETAILS',\n  `Call completed: ${formatEastern(input.call_ended_at)}`,\n  `Call duration: ${duration > 0 ? duration + ' seconds' : 'Unavailable'}`,\n  `Call summary: ${input.call_summary || 'Unavailable'}`,\n  `Client call view: ${input.call_summary_link || 'https://docs.google.com/spreadsheets/d/19ekskZGExeGti_9hSGJaCeaOcB3G0E1vxYg9I_yi3no/edit?gid=1129582252#gid=1129582252'}`,\n  `Full recording: ${input.recording_url || 'Unavailable'}`,\n].join('\\n');\nreturn [{ json: { ...input, calendar_event_id: eventId, completion_details: completionDetails } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        272
+      ],
+      "id": "c0a16000-0000-4000-8000-000000000002",
+      "name": "Prepare Calendar Enrichment"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "calendar": {
+          "__rl": true,
+          "value": "b4fc40e9bb0fb683b2ef40e485172be70db3a29a2bb3e69c17508199285adf7d@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "Equation Discovery Calls"
+        },
+        "eventId": "={{ $json.calendar_event_id }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        448,
+        272
+      ],
+      "id": "c0a16000-0000-4000-8000-000000000003",
+      "name": "Get Calendar Event",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "7pyExXcOIsdwosTU",
+          "name": "Google Calendar account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "calendar": {
+          "__rl": true,
+          "value": "b4fc40e9bb0fb683b2ef40e485172be70db3a29a2bb3e69c17508199285adf7d@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "Equation Discovery Calls"
+        },
+        "eventId": "={{ $('Prepare Calendar Enrichment').item.json.calendar_event_id }}",
+        "useDefaultReminders": false,
+        "updateFields": {
+          "description": "={{ ($json.description || '') + '\\n\\n' + $('Prepare Calendar Enrichment').item.json.completion_details }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        672,
+        272
+      ],
+      "id": "c0a16000-0000-4000-8000-000000000004",
+      "name": "Update Calendar Event",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "7pyExXcOIsdwosTU",
+          "name": "Google Calendar account 2"
+        }
+      }
     }
   ],
   "connections": {
@@ -82,6 +165,39 @@
         [
           {
             "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Called for Calendar Enrichment": {
+      "main": [
+        [
+          {
+            "node": "Prepare Calendar Enrichment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Calendar Enrichment": {
+      "main": [
+        [
+          {
+            "node": "Get Calendar Event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Calendar Event": {
+      "main": [
+        [
+          {
+            "node": "Update Calendar Event",
             "type": "main",
             "index": 0
           }

@@ -1,5 +1,18 @@
 # Changelog
 
+## Unreleased — The System V.1.1 controlled refinement
+
+- Created Retell V17 draft titled `The System V.1.1` from V16 without publishing it or changing the inbound phone assignment.
+- Replaced the greeting with the approved Wondora Brands wording and strengthened barge-in priority, concise booking confirmation, and Won-Dor-Ah pronunciation guidance.
+- Kept Cimo, speed 1.12, temperature 1.0, volume 1.0, response eagerness 1.0, interruption sensitivity 0.9, fast transcription, denoising, and no background audio.
+- Added the `Wondora` boosted keyword; Cimo still does not support Retell pronunciation dictionaries.
+- Added Workflow 1 call start/end, duration, stable Retell recording URL, booking-completion timestamp, and Client View link mappings.
+- Added a fail-closed post-call enrichment path from Workflow 1 into Workflow 6; Workflow 6 remains the only calendar writer.
+- Added clean booking-time notes at calendar creation and final duration, summary, Client View, and recording details after `call_analyzed`.
+- Added the non-destructive Google Sheets `Client View` tab and six additive raw Call Log metadata columns.
+- Added a 20-scenario structural regression suite while preserving the existing SMS eligibility and deduplication tests.
+- Preserved the immutable `the-system-v1` tag and did not create a V1.1 tag or release.
+
 ## The System V.1 — production snapshot — 2026-08-25
 
 - Captured sanitized exports of all six active/published production n8n workflows with exact workflow and version IDs.
