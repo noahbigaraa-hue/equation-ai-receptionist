@@ -1,6 +1,8 @@
 # Equation AI Receptionist
 
-Private, restorable configuration and refinement history for the working Wondora production receptionist as of August 20, 2026.
+Restorable configuration and refinement history for the working Wondora production receptionist.
+
+The immutable production capture for **The System V.1** is in [`snapshots/the-system-v1`](snapshots/the-system-v1). It records the exact live Retell, n8n, Google Sheets, and Google Calendar state observed on August 25, 2026 before the V1.1 refinement began.
 
 ## Current production architecture
 
@@ -24,7 +26,7 @@ Phone → Retell AI → n8n → Google Calendar → email/SMS/logging.
 | Retell agent | Wondora V2 |
 | Published version | V15 — Human Conversation and Scheduling Safety |
 | Compliance draft | V16 — explicit post-booking SMS consent; not published |
-| Phone assignment | Latest Published |
+| Phone assignment | Pinned to V16 Draft as observed August 25, 2026 |
 | Phone number | +1 239 299 7352 |
 | Voice | Cimo |
 | Voice speed | 1.12 |

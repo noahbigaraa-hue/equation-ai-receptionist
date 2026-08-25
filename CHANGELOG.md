@@ -1,5 +1,13 @@
 # Changelog
 
+## The System V.1 — production snapshot — 2026-08-25
+
+- Captured sanitized exports of all six active/published production n8n workflows with exact workflow and version IDs.
+- Captured the live Retell V16 draft prompt and voice/settings inventory without changing production.
+- Recorded that `+1 239 299 7352` was explicitly pinned to V16 Draft while V15 remained the latest published Retell version.
+- Documented the pre-refinement Google Sheets schema and the latest confirmed real Google Calendar event format.
+- Added SHA-256 checksums and retained all prior unpublished SMS/A2P preparation outside the immutable snapshot directory.
+
 ## Unreleased — SMS consent and A2P preparation
 
 - Created Retell V16 as an unpublished draft from the published V15 production version.

@@ -1,0 +1,94 @@
+{
+  "snapshot_date": "2026-08-25",
+  "agent": {
+    "name": "Wondora V2",
+    "published_version": 15,
+    "published_version_title": "Human Conversation and Scheduling Safety",
+    "draft_version": 16,
+    "draft_status": "SMS consent and compliance refinement; not published",
+    "phone_assignment": "Pinned to V16 Draft",
+    "phone_number": "+12392997352",
+    "llm": "GPT 4.1",
+    "live_inbound_version": 16,
+    "live_inbound_status": "Draft selected explicitly on +12392997352"
+  },
+  "welcome_message": {
+    "mode": "AI speaks first",
+    "type": "Custom message",
+    "pause_before_speaking_seconds": 0,
+    "text": "Howzit, thanks for calling Wondora. I'm Isabella, how can I help you today?"
+  },
+  "voice": {
+    "name": "Cimo",
+    "voice_id": "fish_audio-Cimo",
+    "model": "Auto (S2.1 Pro)",
+    "expressive_mode": false,
+    "speed": 1.12,
+    "temperature": 1.0,
+    "volume": 1.0,
+    "language": "English (US)"
+  },
+  "speech_settings": {
+    "background_sound": "None",
+    "response_eagerness": 1.0,
+    "dynamic_response_eagerness": false,
+    "interruption_sensitivity": 0.9,
+    "reminder_frequency_seconds": 10,
+    "reminder_max_times": 1
+  },
+  "business": {
+    "timezone": "America/New_York",
+    "hours": "Monday-Friday, 9:00 AM-5:00 PM Eastern",
+    "appointment_type": "Marketing Consulting",
+    "appointment_duration_minutes": 30,
+    "calendar_name": "Equation Discovery Calls"
+  },
+  "attached_functions": [
+    "end_call",
+    "check_availability_cal",
+    "book_appointment_cal"
+  ],
+  "webhook": {
+    "url": "https://equation-us.app.n8n.cloud/webhook/retell-call-intake",
+    "timeout_seconds": 5,
+    "enabled_events": [
+      "call_started",
+      "call_ended",
+      "call_analyzed"
+    ],
+    "disabled_events": [
+      "transcript_updated",
+      "transfer_started",
+      "transfer_bridged",
+      "transfer_cancelled",
+      "transfer_ended"
+    ]
+  },
+  "post_call_extraction_draft_v16": [
+    {
+      "name": "booking_succeeded",
+      "type": "boolean",
+      "optional": true,
+      "rule": "True only after book_appointment_cal returns success and Isabella confirms the booking; false for a failed or incomplete booking; empty when no booking was attempted."
+    },
+    {
+      "name": "sms_consent_granted",
+      "type": "boolean",
+      "optional": true,
+      "rule": "True only after the post-booking consent question receives a clear affirmative answer; false only for a clear decline; otherwise empty."
+    },
+    {
+      "name": "sms_consent_evidence",
+      "type": "text",
+      "optional": true,
+      "rule": "Quote or closely transcribe the SMS consent question and caller response; otherwise empty."
+    }
+  ],
+  "notes": [
+    "V15 is the latest published production version. SMS consent work is isolated in the unpublished V16 draft.",
+    "No transfer function is attached. The previously documented destination is unverified, so the draft uses message-taking as the safe fallback.",
+    "The stale Wonder Knowledge Base remains detached from V15 and the V16 draft.",
+    "Coffee Shop and no-background audio variants were exercised in draft Test Audio. The no-background variant is retained for cleaner, more professional telephone speech.",
+    "Observed in Retell Phone Numbers on 2026-08-25: the inbound number is explicitly pinned to V16 (Draft), not Latest Published V15. This snapshot records that state without changing it."
+  ]
+}
